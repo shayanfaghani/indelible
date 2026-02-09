@@ -1,7 +1,6 @@
 .next
 node_modules
 .env*.local
-.env.local.example
 .env
 .DS_Store
 *.pem
