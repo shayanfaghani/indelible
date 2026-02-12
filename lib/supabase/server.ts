@@ -1,6 +1,6 @@
 import { createServerClient as createSSRServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "./client";
+import type { Database } from "./database.types";
 
 export const createServerClient = () => {
     const cookieStore = cookies();
@@ -12,6 +12,20 @@ export const createServerClient = () => {
             cookies: {
                 get(name: string) {
                     return cookieStore.get(name)?.value;
+                },
+                set(name: string, value: string, options: any) {
+                    try {
+                        cookieStore.set({ name, value, ...options });
+                    } catch (error) {
+                        // Handle middleware or server component set cookie restrictions
+                    }
+                },
+                remove(name: string, options: any) {
+                    try {
+                        cookieStore.set({ name, value: "", ...options });
+                    } catch (error) {
+                        // Handle middleware or server component remove cookie restrictions
+                    }
                 },
             },
         }

@@ -6,17 +6,17 @@ export async function GET() {
     try {
         const supabase = createServerClient();
         const {
-            data: { session },
-        } = await supabase.auth.getSession();
+            data: { user },
+        } = await supabase.auth.getUser();
 
-        if (!session) {
+        if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { data: cards, error } = await supabase
+        const { data: cards, error } = await (supabase as any)
             .from("cards")
             .select("*")
-            .eq("user_id", session.user.id)
+            .eq("user_id", user.id)
             .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -32,10 +32,10 @@ export async function POST(request: Request) {
     try {
         const supabase = createServerClient();
         const {
-            data: { session },
-        } = await supabase.auth.getSession();
+            data: { user },
+        } = await supabase.auth.getUser();
 
-        if (!session) {
+        if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -48,17 +48,18 @@ export async function POST(request: Request) {
             );
         }
 
-        const { data: card, error } = (await supabase
+        // @ts-ignore
+        const { data: card, error } = await (supabase as any)
             .from("cards")
             .insert({
-                user_id: session.user.id,
+                user_id: user.id,
                 front,
                 back,
                 box_level: 1,
                 next_review_at: new Date().toISOString(),
             })
             .select()
-            .single()) as any;
+            .single();
 
         if (error) throw error;
 
@@ -73,10 +74,10 @@ export async function DELETE(request: Request) {
     try {
         const supabase = createServerClient();
         const {
-            data: { session },
-        } = await supabase.auth.getSession();
+            data: { user },
+        } = await supabase.auth.getUser();
 
-        if (!session) {
+        if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -87,11 +88,11 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: "Card ID required" }, { status: 400 });
         }
 
-        const { error } = await supabase
+        const { error } = await (supabase as any)
             .from("cards")
             .delete()
             .eq("id", cardId)
-            .eq("user_id", session.user.id);
+            .eq("user_id", user.id);
 
         if (error) throw error;
 

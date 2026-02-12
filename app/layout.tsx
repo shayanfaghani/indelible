@@ -8,13 +8,17 @@ export const metadata: Metadata = {
     title: "Indelible - Lifelong Knowledge Mastery",
     description: "A minimalist spaced-repetition app with the Infinity Vault for permanent knowledge retention",
     manifest: "/manifest.json",
-    themeColor: "#0A0A0B",
     appleWebApp: {
         capable: true,
         statusBarStyle: "black-translucent",
         title: "Indelible",
     },
 };
+
+export const viewport = {
+    themeColor: "#0A0A0B",
+};
+
 
 export default function RootLayout({
     children,
