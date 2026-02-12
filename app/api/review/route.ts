@@ -15,18 +15,18 @@ export async function GET() {
     try {
         const supabase = createServerClient();
         const {
-            data: { session },
-        } = await supabase.auth.getSession();
+            data: { user },
+        } = await supabase.auth.getUser();
 
-        if (!session) {
+        if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         // Get all user's cards
-        const { data: allCards, error: cardsError } = (await supabase
+        const { data: allCards, error: cardsError } = await (supabase as any)
             .from("cards")
             .select("*")
-            .eq("user_id", session.user.id)) as any;
+            .eq("user_id", user.id);
 
         if (cardsError) throw cardsError;
 
@@ -48,9 +48,10 @@ export async function GET() {
             });
 
             for (const update of updates) {
-                await supabase
+                // @ts-ignore
+                await (supabase as any)
                     .from("cards")
-                    .update({ next_review_at: update.next_review_at } as any)
+                    .update({ next_review_at: update.next_review_at })
                     .eq("id", update.id);
             }
         }
@@ -66,10 +67,10 @@ export async function POST(request: Request) {
     try {
         const supabase = createServerClient();
         const {
-            data: { session },
-        } = await supabase.auth.getSession();
+            data: { user },
+        } = await supabase.auth.getUser();
 
-        if (!session) {
+        if (!user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -80,12 +81,12 @@ export async function POST(request: Request) {
         }
 
         // Get current card
-        const { data: card, error: cardError } = (await supabase
+        const { data: card, error: cardError } = await (supabase as any)
             .from("cards")
             .select("*")
             .eq("id", cardId)
-            .eq("user_id", session.user.id)
-            .single()) as any;
+            .eq("user_id", user.id)
+            .single();
 
         if (cardError || !card) {
             return NextResponse.json({ error: "Card not found" }, { status: 404 });
@@ -111,31 +112,33 @@ export async function POST(request: Request) {
         const xpGain = calculateXP(result, vaulted);
 
         // Update card
-        await supabase
+        // @ts-ignore
+        await (supabase as any)
             .from("cards")
             .update({
                 box_level: newBoxLevel,
                 last_reviewed: new Date().toISOString(),
                 next_review_at: nextReview.toISOString(),
                 is_vaulted: newBoxLevel >= 6,
-            } as any)
+            })
             .eq("id", cardId);
 
         // Update user profile (XP and Knowledge Net Value)
-        const { data: profile } = (await supabase
+        const { data: profile } = await (supabase as any)
             .from("profiles")
             .select("*")
-            .eq("user_id", session.user.id)
-            .single()) as any;
+            .eq("user_id", user.id)
+            .single();
 
         if (profile) {
-            await supabase
+            // @ts-ignore
+            await (supabase as any)
                 .from("profiles")
                 .update({
                     xp: profile.xp + xpGain,
                     knowledge_net_value: profile.knowledge_net_value + xpGain,
-                } as any)
-                .eq("user_id", session.user.id);
+                })
+                .eq("user_id", user.id);
         }
 
         return NextResponse.json({

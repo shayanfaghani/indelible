@@ -7,25 +7,25 @@ async function getDashboardData(userId: string) {
     const supabase = createServerClient();
 
     // Get profile
-    const { data: profile } = (await supabase
+    const { data: profile } = await (supabase as any)
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
-        .single()) as any;
+        .single();
 
     // Get all cards
-    const { data: allCards } = (await supabase
+    const { data: allCards } = await (supabase as any)
         .from("cards")
         .select("*")
-        .eq("user_id", userId)) as any;
+        .eq("user_id", userId);
 
     // Get due cards count
     const now = new Date().toISOString();
-    const { data: dueCards } = (await supabase
+    const { data: dueCards } = await (supabase as any)
         .from("cards")
         .select("*")
         .eq("user_id", userId)
-        .lte("next_review_at", now)) as any;
+        .lte("next_review_at", now);
 
     // Get vaulted cards count
     const vaultedCount = allCards?.filter((c: any) => c.is_vaulted).length || 0;
@@ -41,15 +41,15 @@ async function getDashboardData(userId: string) {
 export default async function DashboardPage() {
     const supabase = createServerClient();
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
         redirect("/login");
     }
 
     const { profile, totalCards, dueCardsCount, vaultedCount } = await getDashboardData(
-        session.user.id
+        user.id
     );
 
     return (
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
                         >
                             {dueCardsCount > 0
                                 ? `Review ${dueCardsCount} Card${dueCardsCount === 1 ? "" : "s"}`
-                                : "No Cards Due"}
+                                : "No Cards Due Today"}
                         </Link>
                         <Link
                             href="/cards/new"
