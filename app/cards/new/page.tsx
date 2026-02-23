@@ -28,7 +28,8 @@ export default function NewCardPage() {
                 throw new Error(data.error || "Failed to create card");
             }
 
-            router.push("/dashboard");
+            // Use hard navigation to bypass Next.js Router Cache entirely
+            window.location.href = "/dashboard";
         } catch (err: any) {
             setError(err.message);
         } finally {
