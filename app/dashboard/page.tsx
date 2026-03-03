@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import AuthGuard from "@/components/auth/AuthGuard";
+import ProfileMenu from "@/components/profile/ProfileMenu";
 
 async function getDashboardData(userId: string) {
     const supabase = createServerClient();
@@ -59,14 +60,11 @@ export default async function DashboardPage() {
                     {/* Header */}
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl md:text-4xl font-bold text-gold">Indelible</h1>
-                        <form action="/api/auth/logout" method="POST">
-                            <button
-                                type="submit"
-                                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-                            >
-                                Sign Out
-                            </button>
-                        </form>
+                        <ProfileMenu
+                            avatarUrl={profile?.avatar_url || null}
+                            firstName={profile?.first_name || null}
+                            lastName={profile?.last_name || null}
+                        />
                     </div>
 
                     {/* Knowledge Net Value */}
