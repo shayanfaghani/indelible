@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import AuthGuard from "@/components/auth/AuthGuard";
 import ProfileMenu from "@/components/profile/ProfileMenu";
+import WordSlideshow from "@/components/dashboard/WordSlideshow";
+import essentialWords from "@/lib/data/essential-words";
 
 async function getDashboardData(userId: string) {
     const supabase = createServerClient();
@@ -101,45 +103,55 @@ export default async function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* Due cards nudge */}
-                    {dueCardsCount > 0 && (
-                        <div className="flex items-center gap-3 bg-gold/10 border border-gold/30 rounded-xl px-5 py-4 mb-6">
-                            <span className="relative flex h-2.5 w-2.5 shrink-0">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold"></span>
-                            </span>
-                            <p className="text-gold text-sm font-medium">
-                                You have <span className="font-bold">{dueCardsCount} card{dueCardsCount === 1 ? "" : "s"}</span> waiting for review today.
-                            </p>
-                        </div>
-                    )}
+                    <div className="flex flex-col md:flex-row gap-6">
+                        {/* Left: nudge + actions */}
+                        <div className="flex-1 flex flex-col gap-4">
+                            {/* Due cards nudge */}
+                            {dueCardsCount > 0 && (
+                                <div className="flex items-center gap-3 bg-gold/10 border border-gold/30 rounded-xl px-5 py-4">
+                                    <span className="relative flex h-2.5 w-2.5 shrink-0">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold"></span>
+                                    </span>
+                                    <p className="text-gold text-sm font-medium">
+                                        You have <span className="font-bold">{dueCardsCount} card{dueCardsCount === 1 ? "" : "s"}</span> waiting for review today.
+                                    </p>
+                                </div>
+                            )}
 
-                    {/* Action Buttons */}
-                    <div className="space-y-4">
-                        <Link
-                            href="/review"
-                            className="flex items-center justify-center gap-3 w-full py-4 bg-gold text-obsidian text-center font-semibold rounded-xl hover:bg-yellow-500 transition-all transform hover:scale-105"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                            {dueCardsCount > 0
-                                ? `Review ${dueCardsCount} Card${dueCardsCount === 1 ? "" : "s"}`
-                                : "No Cards Due Today"}
-                        </Link>
-                        <Link
-                            href="/cards/new"
-                            className="flex items-center justify-center gap-3 w-full py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            Add New Card
-                        </Link>
-                        <Link
-                            href="/cards"
-                            className="flex items-center justify-center gap-3 w-full py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                            Browse All Cards
-                        </Link>
-                    </div>
+                            {/* Action Buttons */}
+                            <div className="space-y-4">
+                                <Link
+                                    href="/review"
+                                    className="flex items-center justify-center gap-3 w-full py-4 bg-gold text-obsidian text-center font-semibold rounded-xl hover:bg-yellow-500 transition-all transform hover:scale-105"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    {dueCardsCount > 0
+                                        ? `Review ${dueCardsCount} Card${dueCardsCount === 1 ? "" : "s"}`
+                                        : "No Cards Due Today"}
+                                </Link>
+                                <Link
+                                    href="/cards/new"
+                                    className="flex items-center justify-center gap-3 w-full py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Add New Card
+                                </Link>
+                                <Link
+                                    href="/cards"
+                                    className="flex items-center justify-center gap-3 w-full py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                                    Browse All Cards
+                                </Link>
+                            </div>
+                        </div>{/* end left col */}
+
+                        {/* Right: word slideshow (desktop only) */}
+                        <div className="hidden md:flex md:w-72 lg:w-80 shrink-0">
+                            <WordSlideshow words={essentialWords} />
+                        </div>
+                    </div>{/* end flex row */}
                 </div>
             </div>
         </AuthGuard>
