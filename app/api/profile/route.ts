@@ -35,7 +35,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { first_name, last_name, phone, avatar_url } = body;
+    const { first_name, last_name, phone, avatar_url, notifications_enabled, notification_time, timezone } = body;
 
     const { data, error } = await (supabase as any)
         .from("profiles")
@@ -44,6 +44,9 @@ export async function PUT(request: Request) {
             last_name: last_name ?? null,
             phone: phone ?? null,
             avatar_url: avatar_url ?? null,
+            notifications_enabled: notifications_enabled ?? false,
+            notification_time: notification_time ?? null,
+            timezone: timezone ?? null,
         })
         .eq("user_id", user.id)
         .select()

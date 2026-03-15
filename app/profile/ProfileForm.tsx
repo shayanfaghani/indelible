@@ -1,7 +1,45 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { requestPermission, subscribeToPush, unsubscribeFromPush, saveSubscription, deleteSubscription } from "@/lib/notifications";
+
+const TIMEZONES = [
+    { value: "Pacific/Honolulu",    label: "Hawaii (UTC−10)" },
+    { value: "America/Anchorage",   label: "Alaska (UTC−9)" },
+    { value: "America/Los_Angeles", label: "Pacific Time (UTC−8/−7)" },
+    { value: "America/Denver",      label: "Mountain Time (UTC−7/−6)" },
+    { value: "America/Chicago",     label: "Central Time (UTC−6/−5)" },
+    { value: "America/New_York",    label: "Eastern Time (UTC−5/−4)" },
+    { value: "America/Sao_Paulo",   label: "Brazil (UTC−3)" },
+    { value: "Atlantic/Azores",     label: "Azores (UTC−1)" },
+    { value: "Europe/London",       label: "London (UTC+0/+1)" },
+    { value: "Europe/Paris",        label: "Central Europe (UTC+1/+2)" },
+    { value: "Europe/Rome",         label: "Rome / Milan (UTC+1/+2)" },
+    { value: "Europe/Helsinki",     label: "Eastern Europe (UTC+2/+3)" },
+    { value: "Europe/Moscow",       label: "Moscow (UTC+3)" },
+    { value: "Asia/Dubai",          label: "Dubai (UTC+4)" },
+    { value: "Asia/Karachi",        label: "Pakistan (UTC+5)" },
+    { value: "Asia/Kolkata",        label: "India (UTC+5:30)" },
+    { value: "Asia/Dhaka",          label: "Bangladesh (UTC+6)" },
+    { value: "Asia/Bangkok",        label: "Bangkok (UTC+7)" },
+    { value: "Asia/Singapore",      label: "Singapore / KL (UTC+8)" },
+    { value: "Asia/Tokyo",          label: "Tokyo (UTC+9)" },
+    { value: "Australia/Sydney",    label: "Sydney (UTC+10/+11)" },
+    { value: "Pacific/Auckland",    label: "New Zealand (UTC+12/+13)" },
+];
+
+const HOURS = Array.from({ length: 24 }, (_, i) => ({
+    value: i,
+    label: i === 0 ? "12:00 AM" : i < 12 ? `${i}:00 AM` : i === 12 ? "12:00 PM" : `${i - 12}:00 PM`,
+}));
+
+const MINUTES = [
+    { value: "00", label: ":00" },
+    { value: "15", label: ":15" },
+    { value: "30", label: ":30" },
+    { value: "45", label: ":45" },
+];
 
 interface Profile {
     id: string;
@@ -12,6 +50,9 @@ interface Profile {
     avatar_url: string | null;
     xp: number;
     knowledge_net_value: number;
+    notifications_enabled: boolean | null;
+    notification_time: string | null;
+    timezone: string | null;
 }
 
 interface ProfileFormProps {
@@ -31,9 +72,46 @@ export default function ProfileForm({ profile, email, userId }: ProfileFormProps
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
+    // Notification state
+    const parseTime = (t: string | null) => {
+        if (!t) return { hour: 9, minute: "00" };
+        const [h, m] = t.split(":");
+        return { hour: parseInt(h, 10), minute: m || "00" };
+    };
+    const savedTime = parseTime(profile?.notification_time || null);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(profile?.notifications_enabled ?? false);
+    const [notifHour, setNotifHour] = useState(savedTime.hour);
+    const [notifMinute, setNotifMinute] = useState(savedTime.minute);
+    const [timezone, setTimezone] = useState(profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+    const [isTogglingNotif, setIsTogglingNotif] = useState(false);
+
     const [isSaving, setIsSaving] = useState(false);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+    const handleToggleNotifications = async () => {
+        setIsTogglingNotif(true);
+        try {
+            if (!notificationsEnabled) {
+                const granted = await requestPermission();
+                if (!granted) {
+                    setMessage({ type: "error", text: "Notification permission denied. Please enable it in your browser settings." });
+                    return;
+                }
+                const sub = await subscribeToPush();
+                await saveSubscription(sub);
+                setNotificationsEnabled(true);
+            } else {
+                const sub = await unsubscribeFromPush();
+                if (sub) await deleteSubscription(sub.endpoint);
+                setNotificationsEnabled(false);
+            }
+        } catch (err: any) {
+            setMessage({ type: "error", text: err.message || "Failed to update notification settings" });
+        } finally {
+            setIsTogglingNotif(false);
+        }
+    };
 
     const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -90,6 +168,9 @@ export default function ProfileForm({ profile, email, userId }: ProfileFormProps
                     last_name: lastName,
                     phone: phone || null,
                     avatar_url: newAvatarUrl || null,
+                    notifications_enabled: notificationsEnabled,
+                    notification_time: `${String(notifHour).padStart(2, "0")}:${notifMinute}`,
+                    timezone: timezone || null,
                 }),
             });
 
@@ -239,6 +320,69 @@ export default function ProfileForm({ profile, email, userId }: ProfileFormProps
                         id="profile-phone"
                     />
                 </div>
+            </div>
+
+            {/* Notifications Section */}
+            <div className="mt-8 pt-8 border-t border-gray-800">
+                <h2 className="text-lg font-semibold text-white mb-1">Daily Reminders</h2>
+                <p className="text-gray-500 text-sm mb-5">Get a push notification to review your cards each day.</p>
+
+                {/* Toggle */}
+                <div className="flex items-center justify-between mb-5">
+                    <span className="text-sm font-medium text-gray-300">Enable notifications</span>
+                    <button
+                        type="button"
+                        onClick={handleToggleNotifications}
+                        disabled={isTogglingNotif}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${notificationsEnabled ? "bg-gold" : "bg-gray-700"} disabled:opacity-50`}
+                    >
+                        <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${notificationsEnabled ? "translate-x-6" : "translate-x-1"}`}
+                        />
+                    </button>
+                </div>
+
+                {/* Time & Timezone pickers — shown only when enabled */}
+                {notificationsEnabled && (
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-2">Reminder time</label>
+                            <div className="flex gap-3">
+                                <select
+                                    value={notifHour}
+                                    onChange={(e) => setNotifHour(Number(e.target.value))}
+                                    className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-colors"
+                                >
+                                    {HOURS.map((h) => (
+                                        <option key={h.value} value={h.value}>{h.label}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={notifMinute}
+                                    onChange={(e) => setNotifMinute(e.target.value)}
+                                    className="w-28 px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-colors"
+                                >
+                                    {MINUTES.map((m) => (
+                                        <option key={m.value} value={m.value}>{m.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-2">Timezone</label>
+                            <select
+                                value={timezone}
+                                onChange={(e) => setTimezone(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-colors"
+                            >
+                                {TIMEZONES.map((tz) => (
+                                    <option key={tz.value} value={tz.value}>{tz.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Message */}
