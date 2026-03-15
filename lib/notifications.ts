@@ -22,11 +22,12 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
     });
 }
 
-export async function unsubscribeFromPush(): Promise<void> {
-    if (!("serviceWorker" in navigator)) return;
+export async function unsubscribeFromPush(): Promise<PushSubscription | null> {
+    if (!("serviceWorker" in navigator)) return null;
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.getSubscription();
     if (subscription) await subscription.unsubscribe();
+    return subscription;
 }
 
 export async function saveSubscription(subscription: PushSubscription): Promise<void> {

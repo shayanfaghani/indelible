@@ -82,7 +82,7 @@ export default function ProfileForm({ profile, email, userId }: ProfileFormProps
     const [notificationsEnabled, setNotificationsEnabled] = useState(profile?.notifications_enabled ?? false);
     const [notifHour, setNotifHour] = useState(savedTime.hour);
     const [notifMinute, setNotifMinute] = useState(savedTime.minute);
-    const [timezone, setTimezone] = useState(profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+    const [timezone, setTimezone] = useState(profile?.timezone || (typeof window !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "America/New_York"));
     const [isTogglingNotif, setIsTogglingNotif] = useState(false);
 
     const [isSaving, setIsSaving] = useState(false);
