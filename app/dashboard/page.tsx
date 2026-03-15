@@ -89,7 +89,10 @@ export default async function DashboardPage() {
                             <p className="text-3xl font-bold text-white">{dueCardsCount}</p>
                         </div>
                         <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-                            <p className="text-gray-400 text-sm mb-2">In Vault</p>
+                            <div className="flex items-center gap-2 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+                                <p className="text-gray-400 text-sm">In Vault</p>
+                            </div>
                             <p className="text-3xl font-bold text-emerald">{vaultedCount}</p>
                         </div>
                         <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
@@ -102,22 +105,25 @@ export default async function DashboardPage() {
                     <div className="space-y-4">
                         <Link
                             href="/review"
-                            className="block w-full py-4 bg-gold text-obsidian text-center font-semibold rounded-xl hover:bg-yellow-500 transition-all transform hover:scale-105"
+                            className="flex items-center justify-center gap-3 w-full py-4 bg-gold text-obsidian text-center font-semibold rounded-xl hover:bg-yellow-500 transition-all transform hover:scale-105"
                         >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                             {dueCardsCount > 0
                                 ? `Review ${dueCardsCount} Card${dueCardsCount === 1 ? "" : "s"}`
                                 : "No Cards Due Today"}
                         </Link>
                         <Link
                             href="/cards/new"
-                            className="block w-full py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
+                            className="flex items-center justify-center gap-3 w-full py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
                         >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             Add New Card
                         </Link>
                         <Link
                             href="/cards"
-                            className="block w-full py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
+                            className="flex items-center justify-center gap-3 w-full py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
                         >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                             Browse All Cards
                         </Link>
                     </div>
