@@ -21,7 +21,7 @@ export async function GET() {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ profile });
+    return NextResponse.json({ profile: { ...profile, email: user.email ?? null } });
 }
 
 export async function PUT(request: Request) {
