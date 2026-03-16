@@ -1,8 +1,10 @@
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
     const rawData = window.atob(base64);
-    return Uint8Array.from(Array.from(rawData).map((c) => c.charCodeAt(0)));
+    const bytes = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; i++) bytes[i] = rawData.charCodeAt(i);
+    return bytes;
 }
 
 export async function requestPermission(): Promise<NotificationPermission> {
@@ -38,8 +40,8 @@ export async function saveSubscription(subscription: PushSubscription): Promise<
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             endpoint: subscription.endpoint,
-            p256dh: key ? btoa(String.fromCharCode(...new Uint8Array(key))) : "",
-            auth: auth ? btoa(String.fromCharCode(...new Uint8Array(auth))) : "",
+            p256dh: key ? btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(key)))) : "",
+            auth: auth ? btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(auth)))) : "",
         }),
     });
 }
