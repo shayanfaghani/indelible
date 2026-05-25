@@ -5,6 +5,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import ProfileMenu from "@/components/profile/ProfileMenu";
 import WordSlideshow from "@/components/dashboard/WordSlideshow";
 import essentialWords from "@/lib/data/essential-words";
+import AIGenerateButton from "@/components/cards/AIGenerateButton";
 
 async function getDashboardData(userId: string) {
     const supabase = createServerClient();
@@ -137,6 +138,7 @@ export default async function DashboardPage() {
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                     Add New Card
                                 </Link>
+                                <AIGenerateButton />
                                 <Link
                                     href="/cards"
                                     className="flex items-center justify-center gap-3 w-full py-3 md:py-4 bg-gray-800 text-white text-center font-semibold rounded-xl hover:bg-gray-700 transition-all border border-gray-700"
