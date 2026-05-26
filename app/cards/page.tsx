@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AuthGuard from "@/components/auth/AuthGuard";
+import AIGenerateModal from "@/components/cards/AIGenerateModal";
+import AIIcon from "@/components/icons/AIIcon";
 
 interface Card {
     id: string;
@@ -18,6 +20,8 @@ interface EditState {
     back: string;
 }
 
+type DefineState = { definition: string; example: string } | "loading" | "error";
+
 export default function CardsPage() {
     const [cards, setCards] = useState<Card[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -25,10 +29,14 @@ export default function CardsPage() {
     const [editState, setEditState] = useState<EditState>({ front: "", back: "" });
     const [pendingSave, setPendingSave] = useState<{ cardId: string; front: string; back: string } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [definitionMap, setDefinitionMap] = useState<Record<string, DefineState>>({});
+    const [isAIModalOpen, setIsAIModalOpen] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
         fetchCards();
+        window.addEventListener("cards-updated", fetchCards);
+        return () => window.removeEventListener("cards-updated", fetchCards);
     }, []);
 
     const fetchCards = async () => {
@@ -91,6 +99,41 @@ export default function CardsPage() {
         }
     };
 
+    const handleDefine = async (card: Card) => {
+        const current = definitionMap[card.id];
+        if (current && current !== "loading") {
+            setDefinitionMap((prev) => {
+                const next = { ...prev };
+                delete next[card.id];
+                return next;
+            });
+            return;
+        }
+
+        setDefinitionMap((prev) => ({ ...prev, [card.id]: "loading" }));
+
+        try {
+            const res = await fetch("/api/ai/define-word", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ word: card.front }),
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setDefinitionMap((prev) => ({ ...prev, [card.id]: "error" }));
+                return;
+            }
+
+            setDefinitionMap((prev) => ({
+                ...prev,
+                [card.id]: { definition: data.definition, example: data.example },
+            }));
+        } catch {
+            setDefinitionMap((prev) => ({ ...prev, [card.id]: "error" }));
+        }
+    };
+
     const getBoxLabel = (level: number) => {
         const labels = ["Daily", "2 Days", "4 Days", "Weekly", "Bi-weekly", "6 Months", "Yearly", "2 Years"];
         return labels[level - 1] || "Unknown";
@@ -120,13 +163,22 @@ export default function CardsPage() {
                             </button>
                             <h1 className="text-2xl font-bold text-white">All Cards</h1>
                         </div>
-                        <button
-                            onClick={() => router.push("/cards/new")}
-                            className="flex items-center gap-2 px-4 py-2 bg-gold text-obsidian font-semibold rounded-lg hover:bg-yellow-500 transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            New Card
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsAIModalOpen(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+                            >
+                                <AIIcon size={16} />
+                                AI
+                            </button>
+                            <button
+                                onClick={() => router.push("/cards/new")}
+                                className="flex items-center gap-2 px-4 py-2 bg-gold text-obsidian font-semibold rounded-lg hover:bg-yellow-500 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                New Card
+                            </button>
+                        </div>
                     </div>
 
                     {cards.length === 0 ? (
@@ -191,6 +243,16 @@ export default function CardsPage() {
                                                 </div>
                                                 <div className="flex items-center gap-3 ml-4">
                                                     <button
+                                                        onClick={() => handleDefine(card)}
+                                                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
+                                                    >
+                                                        {definitionMap[card.id] === "loading"
+                                                            ? "..."
+                                                            : definitionMap[card.id]
+                                                            ? "Hide"
+                                                            : "Define"}
+                                                    </button>
+                                                    <button
                                                         onClick={() => startEdit(card)}
                                                         className="text-gray-400 hover:text-white transition-colors text-sm"
                                                     >
@@ -223,6 +285,29 @@ export default function CardsPage() {
                                                     Next: {new Date(card.next_review_at).toLocaleDateString()}
                                                 </span>
                                             </div>
+                                            {definitionMap[card.id] && (
+                                                <div className="mt-3 border-t border-gray-800 pt-3">
+                                                    {definitionMap[card.id] === "loading" ? (
+                                                        <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                                            <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-gray-500" />
+                                                            Looking up definition...
+                                                        </div>
+                                                    ) : definitionMap[card.id] === "error" ? (
+                                                        <p className="text-red-400 text-sm">
+                                                            Failed to get definition. Check your daily limit or try again.
+                                                        </p>
+                                                    ) : (
+                                                        <div className="space-y-1">
+                                                            <p className="text-gray-300 text-sm">
+                                                                {(definitionMap[card.id] as { definition: string; example: string }).definition}
+                                                            </p>
+                                                            <p className="text-gray-500 text-sm italic">
+                                                                &ldquo;{(definitionMap[card.id] as { definition: string; example: string }).example}&rdquo;
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -231,6 +316,16 @@ export default function CardsPage() {
                     )}
                 </div>
             </div>
+
+            {isAIModalOpen && (
+                <AIGenerateModal
+                    onClose={() => setIsAIModalOpen(false)}
+                    onSuccess={() => {
+                        fetchCards();
+                        setIsAIModalOpen(false);
+                    }}
+                />
+            )}
 
             {/* Box reset confirmation modal */}
             {pendingSave && (
