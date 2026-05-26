@@ -160,6 +160,12 @@ export async function POST(request: Request) {
             );
         }
 
+        // If LLM says delete_duplicates but we already know there are none, suppress the action
+        if (parsed.action === "delete_duplicates" && allDeleteIds.length === 0) {
+            parsed.action = null;
+            parsed.requiresConfirmation = false;
+        }
+
         // Always require confirmation for add_single_card regardless of what the LLM returned
         if (parsed.action === "add_single_card") {
             parsed.requiresConfirmation = true;
