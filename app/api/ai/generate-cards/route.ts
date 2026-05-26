@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const { allowed, currentCount } = await checkUsage(supabase, user.id);
+        const { allowed, currentCount, userLimit } = await checkUsage(supabase, user.id);
 
         if (!allowed) {
             return NextResponse.json(
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const remaining = await incrementUsage(supabase, user.id, currentCount);
+        const remaining = await incrementUsage(supabase, user.id, currentCount, userLimit);
 
         return NextResponse.json({ suggestions, remainingRequests: remaining }, { status: 200 });
     } catch (error: any) {

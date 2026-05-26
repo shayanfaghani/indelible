@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import AIIcon from "@/components/icons/AIIcon";
 
 const COUNT_OPTIONS = [5, 10, 15, 20] as const;
 type CountOption = (typeof COUNT_OPTIONS)[number];
@@ -15,16 +16,19 @@ type Step = "input" | "reviewing" | "success";
 interface Props {
     onClose: () => void;
     onSuccess: (count: number) => void;
+    initialTopic?: string;
+    initialCount?: CountOption;
 }
 
-export default function AIGenerateModal({ onClose, onSuccess }: Props) {
+export default function AIGenerateModal({ onClose, onSuccess, initialTopic, initialCount }: Props) {
     const [step, setStep] = useState<Step>("input");
 
     // input step
-    const [topic, setTopic] = useState("");
-    const [count, setCount] = useState<CountOption>(10);
+    const [topic, setTopic] = useState(initialTopic ?? "");
+    const [count, setCount] = useState<CountOption>(initialCount ?? 10);
     const [isGenerating, setIsGenerating] = useState(false);
     const [remainingRequests, setRemainingRequests] = useState<number | null>(null);
+    const [dailyLimit, setDailyLimit] = useState<number | null>(null);
     const [generateError, setGenerateError] = useState<string | null>(null);
 
     // reviewing step
@@ -39,7 +43,10 @@ export default function AIGenerateModal({ onClose, onSuccess }: Props) {
     useEffect(() => {
         fetch("/api/ai/usage")
             .then((r) => r.json())
-            .then((d) => setRemainingRequests(d.remainingRequests ?? null))
+            .then((d) => {
+                setRemainingRequests(d.remainingRequests ?? null);
+                setDailyLimit(d.dailyLimit ?? null);
+            })
             .catch(() => {});
     }, []);
 
@@ -132,11 +139,11 @@ export default function AIGenerateModal({ onClose, onSuccess }: Props) {
                         <div className="flex items-start justify-between mb-5">
                             <div>
                                 <h2 className="text-white font-semibold text-lg">Generate Cards with AI</h2>
-                                {remainingRequests !== null && (
+                                {remainingRequests !== null && dailyLimit !== null && (
                                     <p className="text-xs text-gray-500 mt-0.5">
-                                        {remainingRequests === Infinity
+                                        {dailyLimit >= 100000
                                             ? "Unlimited requests"
-                                            : `${remainingRequests} of 3 requests remaining today`}
+                                            : `${remainingRequests} of ${dailyLimit} requests remaining today`}
                                     </p>
                                 )}
                             </div>
@@ -196,7 +203,7 @@ export default function AIGenerateModal({ onClose, onSuccess }: Props) {
                                     "Daily limit reached"
                                 ) : (
                                     <>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                        <AIIcon size={16} />
                                         Generate {count} Cards
                                     </>
                                 )}
@@ -295,7 +302,7 @@ export default function AIGenerateModal({ onClose, onSuccess }: Props) {
                         <p className="text-gray-400 text-sm mb-1">
                             {successCount} new card{successCount !== 1 ? "s" : ""} have been added to your deck.
                         </p>
-                        {remainingRequests !== null && remainingRequests !== Infinity && (
+                        {remainingRequests !== null && dailyLimit !== null && dailyLimit < 100000 && (
                             <p className="text-gray-500 text-xs mb-6">
                                 {remainingRequests} AI request{remainingRequests !== 1 ? "s" : ""} remaining today.
                             </p>

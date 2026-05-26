@@ -1,6 +1,40 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+export async function DELETE(request: Request) {
+    try {
+        const supabase = createServerClient();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const body = await request.json();
+        const { ids, all } = body;
+
+        let query = (supabase as any).from("cards").delete().eq("user_id", user.id);
+
+        if (all === true) {
+            // delete all — no extra filter needed beyond user_id
+        } else if (Array.isArray(ids) && ids.length > 0) {
+            // Validate: only allow IDs that actually belong to the user (RLS enforces this too)
+            query = query.in("id", ids);
+        } else {
+            return NextResponse.json({ error: "Provide ids array or all:true." }, { status: 400 });
+        }
+
+        const { error, count } = await query.select();
+        if (error) throw error;
+
+        return NextResponse.json({ deleted: count ?? 0 });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
 export async function POST(request: Request) {
     try {
         const supabase = createServerClient();

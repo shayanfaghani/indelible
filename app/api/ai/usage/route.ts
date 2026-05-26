@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { getRemainingRequests, DAILY_LIMIT } from "@/lib/ai/client";
+import { checkUsage } from "@/lib/ai/client";
 
 export async function GET() {
     try {
@@ -13,12 +13,12 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const remaining = await getRemainingRequests(supabase, user.id);
+        const { currentCount, userLimit } = await checkUsage(supabase, user.id);
 
         return NextResponse.json({
-            remainingRequests: remaining,
-            usedToday: DAILY_LIMIT - remaining,
-            dailyLimit: DAILY_LIMIT,
+            remainingRequests: Math.max(0, userLimit - currentCount),
+            usedToday: currentCount,
+            dailyLimit: userLimit,
         });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
