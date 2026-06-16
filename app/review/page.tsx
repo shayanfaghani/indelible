@@ -6,6 +6,7 @@ import CardFlip from "@/components/cards/CardFlip";
 import ReviewButtons from "@/components/cards/ReviewButtons";
 import VaultAnimation from "@/components/vault/VaultAnimation";
 import AuthGuard from "@/components/auth/AuthGuard";
+import BottomNav from "@/components/nav/BottomNav";
 
 interface Card {
     id: string;
@@ -119,7 +120,7 @@ export default function ReviewPage() {
 
     return (
         <AuthGuard>
-            <div className="min-h-screen bg-obsidian p-4 md:p-8">
+            <div className="min-h-screen bg-obsidian p-4 md:p-8 pb-28 md:pb-28">
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-8">
@@ -172,6 +173,8 @@ export default function ReviewPage() {
                 {/* Vault Animation */}
                 <VaultAnimation isVisible={showVault} onComplete={handleVaultComplete} />
             </div>
+
+            <BottomNav />
         </AuthGuard>
     );
 }
