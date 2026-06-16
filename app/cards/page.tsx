@@ -154,27 +154,27 @@ export default function CardsPage() {
         <AuthGuard>
             <div className="min-h-screen bg-obsidian p-4 md:p-8 pb-24 md:pb-24">
                 <div className="max-w-4xl mx-auto">
-                    <div className="flex justify-between items-center mb-8">
-                        <div className="flex items-center">
+                    <div className="flex justify-between items-center mb-8 gap-2">
+                        <div className="flex items-center min-w-0">
                             <button
                                 onClick={() => router.push("/dashboard")}
                                 className="text-gray-400 hover:text-white transition-colors mr-3 whitespace-nowrap"
                             >
                                 ← Back
                             </button>
-                            <h1 className="text-lg md:text-2xl font-bold text-white">All Cards</h1>
+                            <h1 className="text-base md:text-2xl font-bold text-white whitespace-nowrap">All Cards</h1>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                             <button
                                 onClick={() => setIsAIModalOpen(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+                                className="flex items-center justify-center gap-2 w-[112px] px-3 py-2 bg-gray-800 text-white text-sm md:text-base font-semibold rounded-lg hover:bg-gray-700 transition-colors border border-gray-700 whitespace-nowrap"
                             >
                                 <AIIcon size={16} />
                                 Generate
                             </button>
                             <button
                                 onClick={() => router.push("/cards/new")}
-                                className="flex items-center gap-2 px-4 py-2 bg-gold text-obsidian font-semibold rounded-lg hover:bg-yellow-500 transition-colors"
+                                className="flex items-center justify-center gap-2 w-[112px] px-3 py-2 bg-gold text-obsidian text-sm md:text-base font-semibold rounded-lg hover:bg-yellow-500 transition-colors whitespace-nowrap"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                 New Card
