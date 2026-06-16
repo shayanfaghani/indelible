@@ -59,9 +59,10 @@ interface ProfileFormProps {
     profile: Profile | null;
     email: string;
     userId: string;
+    pushNotificationsEnabled?: boolean;
 }
 
-export default function ProfileForm({ profile, email, userId }: ProfileFormProps) {
+export default function ProfileForm({ profile, email, userId, pushNotificationsEnabled = false }: ProfileFormProps) {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,12 +94,16 @@ export default function ProfileForm({ profile, email, userId }: ProfileFormProps
         setIsTogglingNotif(true);
         try {
             if (!notificationsEnabled) {
-                const granted = await requestPermission();
-                if (!granted) {
+                const permission = await requestPermission();
+                if (permission !== "granted") {
                     setMessage({ type: "error", text: "Notification permission denied. Please enable it in your browser settings." });
                     return;
                 }
                 const sub = await subscribeToPush();
+                if (!sub) {
+                    setMessage({ type: "error", text: "Push notifications aren't supported in this browser." });
+                    return;
+                }
                 await saveSubscription(sub);
                 setNotificationsEnabled(true);
             } else {
@@ -322,7 +327,8 @@ export default function ProfileForm({ profile, email, userId }: ProfileFormProps
                 </div>
             </div>
 
-            {/* Notifications Section */}
+            {/* Notifications Section — hidden behind PUSH_NOTIFICATIONS_ENABLED feature flag */}
+            {pushNotificationsEnabled && (
             <div className="mt-8 pt-8 border-t border-gray-800">
                 <h2 className="text-lg font-semibold text-white mb-1">Daily Reminders</h2>
                 <p className="text-gray-500 text-sm mb-5">Get a push notification to review your cards each day.</p>
@@ -384,6 +390,7 @@ export default function ProfileForm({ profile, email, userId }: ProfileFormProps
                     </div>
                 )}
             </div>
+            )}
 
             {/* Message */}
             {message && (

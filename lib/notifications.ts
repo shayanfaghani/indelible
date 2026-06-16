@@ -35,7 +35,7 @@ export async function unsubscribeFromPush(): Promise<PushSubscription | null> {
 export async function saveSubscription(subscription: PushSubscription): Promise<void> {
     const key = subscription.getKey("p256dh");
     const auth = subscription.getKey("auth");
-    await fetch("/api/notifications/subscribe", {
+    const res = await fetch("/api/notifications/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -44,12 +44,20 @@ export async function saveSubscription(subscription: PushSubscription): Promise<
             auth: auth ? btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(auth)))) : "",
         }),
     });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to save push subscription");
+    }
 }
 
 export async function deleteSubscription(endpoint: string): Promise<void> {
-    await fetch("/api/notifications/unsubscribe", {
+    const res = await fetch("/api/notifications/unsubscribe", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ endpoint }),
     });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to remove push subscription");
+    }
 }

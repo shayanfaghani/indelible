@@ -21,6 +21,10 @@ export default async function ProfilePage() {
         .eq("user_id", user.id)
         .single();
 
+    // Feature flag: push notifications are temporarily disabled for all users.
+    // Set PUSH_NOTIFICATIONS_ENABLED=true to bring the "Daily Reminders" section back.
+    const pushNotificationsEnabled = process.env.PUSH_NOTIFICATIONS_ENABLED === "true";
+
     return (
         <AuthGuard>
             <div className="min-h-screen bg-obsidian p-4 md:p-8 pb-24 md:pb-24">
@@ -29,6 +33,7 @@ export default async function ProfilePage() {
                         profile={profile}
                         email={user.email || ""}
                         userId={user.id}
+                        pushNotificationsEnabled={pushNotificationsEnabled}
                     />
                 </div>
             </div>
