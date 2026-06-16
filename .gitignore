@@ -16,9 +16,11 @@ public/sw.js
 public/workbox-*.js
 public/worker-*.js
 public/sw.js.map
-public/swe*.js
+public/swe*.js/
 public/workbox-*.js.map
 public/worker-*.js.map
 /CLAUDE.md
 /.claude/
 /supabase/migrations/
+/docs/
+/public/swe-worker*.js
