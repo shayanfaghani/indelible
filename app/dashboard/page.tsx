@@ -6,6 +6,7 @@ import ProfileMenu from "@/components/profile/ProfileMenu";
 import WordSlideshow from "@/components/dashboard/WordSlideshow";
 import essentialWords from "@/lib/data/essential-words";
 import AIGenerateButton from "@/components/cards/AIGenerateButton";
+import BottomNav from "@/components/nav/BottomNav";
 
 async function getDashboardData(userId: string) {
     const supabase = createServerClient();
@@ -58,7 +59,7 @@ export default async function DashboardPage() {
 
     return (
         <AuthGuard>
-            <div className="min-h-screen bg-obsidian p-4 md:p-8">
+            <div className="min-h-screen bg-obsidian p-4 md:p-8 pb-24 md:pb-24">
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-4 md:mb-8">
@@ -87,20 +88,20 @@ export default async function DashboardPage() {
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-3 gap-2 md:gap-4 mb-3 md:mb-8">
-                        <div className="bg-gray-900 rounded-xl p-3 md:p-6 border border-gray-800">
-                            <p className="text-gray-400 text-xs md:text-sm mb-1 md:mb-2">Due Today</p>
-                            <p className="text-xl md:text-3xl font-bold text-white">{dueCardsCount}</p>
+                        <div className="bg-gray-900 rounded-2xl p-3 md:p-5 border border-gray-800 flex flex-col items-center justify-center text-center">
+                            <p className="text-2xl md:text-3xl font-bold text-white mb-1">{dueCardsCount}</p>
+                            <p className="text-gray-400 text-[10px] md:text-xs uppercase tracking-wider">Due Today</p>
                         </div>
-                        <div className="bg-gray-900 rounded-xl p-3 md:p-6 border border-gray-800">
-                            <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald hidden md:block"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
-                                <p className="text-gray-400 text-xs md:text-sm">In Vault</p>
+                        <div className="bg-gray-900 rounded-2xl p-3 md:p-5 border border-gray-800 flex flex-col items-center justify-center text-center">
+                            <p className="text-2xl md:text-3xl font-bold text-emerald mb-1">{vaultedCount}</p>
+                            <div className="flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <p className="text-gray-400 text-[10px] md:text-xs uppercase tracking-wider">In Vault</p>
                             </div>
-                            <p className="text-xl md:text-3xl font-bold text-emerald">{vaultedCount}</p>
                         </div>
-                        <div className="bg-gray-900 rounded-xl p-3 md:p-6 border border-gray-800">
-                            <p className="text-gray-400 text-xs md:text-sm mb-1 md:mb-2">Total Cards</p>
-                            <p className="text-xl md:text-3xl font-bold text-white">{totalCards}</p>
+                        <div className="bg-gray-900 rounded-2xl p-3 md:p-5 border border-gray-800 flex flex-col items-center justify-center text-center">
+                            <p className="text-2xl md:text-3xl font-bold text-white mb-1">{totalCards}</p>
+                            <p className="text-gray-400 text-[10px] md:text-xs uppercase tracking-wider">Total</p>
                         </div>
                     </div>
 
@@ -156,6 +157,7 @@ export default async function DashboardPage() {
                     </div>{/* end flex row */}
                 </div>
             </div>
+            <BottomNav />
         </AuthGuard>
     );
 }

@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import AuthGuard from "@/components/auth/AuthGuard";
 import ProfileForm from "./ProfileForm";
+import BottomNav from "@/components/nav/BottomNav";
 
 export default async function ProfilePage() {
     const supabase = createServerClient();
@@ -22,7 +23,7 @@ export default async function ProfilePage() {
 
     return (
         <AuthGuard>
-            <div className="min-h-screen bg-obsidian p-4 md:p-8">
+            <div className="min-h-screen bg-obsidian p-4 md:p-8 pb-24 md:pb-24">
                 <div className="max-w-2xl mx-auto">
                     <ProfileForm
                         profile={profile}
@@ -31,6 +32,7 @@ export default async function ProfilePage() {
                     />
                 </div>
             </div>
+            <BottomNav />
         </AuthGuard>
     );
 }

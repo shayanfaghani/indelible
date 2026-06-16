@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AuthGuard from "@/components/auth/AuthGuard";
 import AIGenerateModal from "@/components/cards/AIGenerateModal";
 import AIIcon from "@/components/icons/AIIcon";
+import BottomNav from "@/components/nav/BottomNav";
 
 interface Card {
     id: string;
@@ -151,7 +152,7 @@ export default function CardsPage() {
 
     return (
         <AuthGuard>
-            <div className="min-h-screen bg-obsidian p-4 md:p-8">
+            <div className="min-h-screen bg-obsidian p-4 md:p-8 pb-24 md:pb-24">
                 <div className="max-w-4xl mx-auto">
                     <div className="flex justify-between items-center mb-8">
                         <div className="flex items-center">
@@ -196,7 +197,7 @@ export default function CardsPage() {
                             {cards.map((card) => (
                                 <div
                                     key={card.id}
-                                    className={`bg-gray-900 rounded-lg p-6 border ${card.is_vaulted ? "border-emerald/50" : "border-gray-800"}`}
+                                    className={`bg-gray-900 rounded-xl p-5 border border-gray-800 border-l-2 ${card.is_vaulted ? "border-l-emerald" : "border-l-gold/60"}`}
                                 >
                                     {editingId === card.id ? (
                                         <div className="space-y-3">
@@ -354,6 +355,8 @@ export default function CardsPage() {
                     </div>
                 </div>
             )}
+
+            <BottomNav />
         </AuthGuard>
     );
 }
