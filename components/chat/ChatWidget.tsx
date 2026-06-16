@@ -172,7 +172,8 @@ export default function ChatWidget() {
             <button
                 onClick={() => setIsOpen((v) => !v)}
                 aria-label="Open AI assistant"
-                className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gold text-obsidian shadow-lg flex items-center justify-center transition-all hover:bg-yellow-500 hover:scale-105 active:scale-95 ${isOpen ? "scale-95" : ""}`}
+                className={`fixed right-6 z-50 w-14 h-14 rounded-full bg-gold text-obsidian shadow-lg flex items-center justify-center transition-all hover:bg-yellow-500 hover:scale-105 active:scale-95 ${isOpen ? "scale-95" : ""}`}
+                style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
             >
                 {isOpen ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>

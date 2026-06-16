@@ -158,11 +158,11 @@ export default function CardsPage() {
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.push("/dashboard")}
-                                className="text-gray-400 hover:text-white transition-colors mr-4"
+                                className="text-gray-400 hover:text-white transition-colors mr-3 whitespace-nowrap"
                             >
                                 ← Back
                             </button>
-                            <h1 className="text-2xl font-bold text-white">All Cards</h1>
+                            <h1 className="text-lg md:text-2xl font-bold text-white">All Cards</h1>
                         </div>
                         <div className="flex items-center gap-2">
                             <button
@@ -170,7 +170,7 @@ export default function CardsPage() {
                                 className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
                             >
                                 <AIIcon size={16} />
-                                AI
+                                Generate
                             </button>
                             <button
                                 onClick={() => router.push("/cards/new")}
